@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 mb-4">Bem-vindo à Biblioteca!</h1>
+        <p class="lead mb-5">Selecione uma opção abaixo para começar:</p>
+        
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+            <a href="{{ url_for('livros') }}" class="btn btn-primary btn-lg px-4 gap-3">
+                📚 Ver Livros
+            </a>
+            <a href="{{ url_for('eventos') }}" class="btn btn-outline-secondary btn-lg px-4">
+                📅 Ver Eventos
+            </a>
+        </div>
+
+        <div class="mt-5">
+            <a href="{{ url_for('logout') }}" class="text-danger text-decoration-none">
+                Sair do sistema
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
