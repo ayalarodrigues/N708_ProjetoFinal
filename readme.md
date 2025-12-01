@@ -1,146 +1,142 @@
-# Sistema de  Biblioteca Comunitária 
+# Sistema de Biblioteca Comunitária - N708
 
-O projeto consiste em uma plataforma desenvolvida para auxiliar bibliotecas comunitárias no cadastro e organização de livros, controle de empréstimos e devoluções, registro de usuários e divulgação de eventos.
+## 1. Título e Descrição do Projeto
+**Nome do Sistema:** Gestão de Bibliotecas Comunitárias (GBC)
 
-Esse sistema permite gerenciar de forma digital os recursos de uma biblioteca comunitária, oferecendo funcionalidades para cadastrar, consultar, atualizar e remover livros, bem como gerenciar usuários, empréstimos e devoluções. O objetivo é facilitar a organização do acervo, acompanhar o histórico de empréstimos e disponibilizar informações de forma rápida e acessível para a comunidade.
+**Propósito:** Plataforma digital multiplataforma (Web Responsiva) desenvolvida para profissionalizar a gestão de bibliotecas comunitárias em bairros periféricos, facilitando o controle de acervo e a divulgação cultural.
 
-## Problema abordado e justificativa
+**Problema Solucionado:** Resolve a ineficiência na gestão manual de recursos (livros e eventos) em espaços culturais com recursos limitados, promovendo a inclusão digital e o acesso à informação. O projeto está alinhado ao **ODS 11 (Cidades e Comunidades Sustentáveis)**, visando tornar os equipamentos culturais mais acessíveis e organizados.
 
-Muitas bibliotecas comunitárias enfrentam dificuldades para gerenciar livros, empréstimos e eventos culturais de forma eficiente. O problema, portanto, é a ineficiência na gestão de recursos e informações em bibliotecas comunitárias, afetando a experiência de       leitores e a organização interna. 
-A escolha do tema se justifica pela importância da leitura e cultura na formação educacional e social, especialmente em bairros com menor acesso a recursos educativos.
-* O sistema digital de gerenciamento permite automatizar processos, tornando o registro de empréstimos e livros mais confiável.
-* Facilita o acesso dos usuários a informações sobre livros disponíveis e eventos.
-* Contribui para inclusão digital e incentivo à leitura, fortalecendo o papel da biblioteca na comunidade.
+---
 
-Este projeto busca resolver esse problema, gerando um impacto social positivo alinhado ao:
+## 2. Funcionalidades Implementadas
 
-* ODS 4 – Educação de Qualidade: Garantir educação inclusiva, equitativa e de qualidade, e promover oportunidades de aprendizagem ao longo da vida para todos.
+Abaixo, a lista de funcionalidades entregues nesta etapa, com status de implementação:
 
-* ODS 11 – Cidades e Comunidades Sustentáveis: Tornar as cidades e os assentamentos humanos inclusivos, seguros, resilientes e sustentáveis.
+- [x] **Controle de Acesso:** Login seguro com distinção de perfis (Administrador e Leitor).
+- [x] **Gestão de Usuários:** Cadastro de leitores com validação obrigatória de Termos de Uso (LGPD).
+- [x] **Gestão de Acervo:** Cadastro, listagem e busca textual de livros em tempo real.
+- [x] **Status de Disponibilidade:** Indicador visual imediato (Verde/Vermelho) na listagem de livros, substituindo o cálculo complexo de multas para focar na experiência do usuário.
+- [x] **Agenda Cultural:** Divulgação de eventos com informações detalhadas de acessibilidade e local.
+- [x] **Interface Responsiva:** Layout adaptável para dispositivos móveis (Smartphones/Tablets) e Desktops.
 
-## Objetivo do Sistema
+### Screenshots das Telas Principais
+- **Tela de Login:** ![Login](docs/img/login.png)
+- **Listagem de Livros:** ![Livros](docs/img/livros.png)
+- **Painel de Eventos:** ![Eventos](docs/img/eventos.png)
 
-### Geral: 
+---
 
-* Desenvolver uma solução de software para otimizar a gestão de bibliotecas comunitárias, promovendo a leitura e a participação cultural.
+## 3. Tecnologias Utilizadas
 
-### Específicações:
+### Linguagens e Frameworks
+- **Linguagem:** Python 3.10+
+- **Backend:** Flask (Microframework)
+- **Frontend:** HTML5, CSS3 (Bootstrap 5 via CDN), Jinja2 (Templating Engine)
 
-* Automatizar o cadastro e a consulta de livros.
+### Banco de Dados
+- **SQLite 3:** Banco de dados relacional serverless (arquivo `.db`). Escolhido pela portabilidade e facilidade de backup em computadores modestos, eliminando a necessidade de servidores dedicados.
 
-* Digitalizar o processo de empréstimos e devoluções.
+### Ferramentas de Desenvolvimento
+- **Git/GitHub:** Versionamento de código.
+- **VS Code:** Ambiente de desenvolvimento integrado (IDE).
+- **Unittest:** Biblioteca nativa do Python para testes automatizados.
 
-* Facilitar a gestão de usuários (leitores e administradores).
+---
 
-* Gerar relatórios básicos para apoiar a tomada de decisão.
-
-
-## Escopo do Projeto 
+## 4. Arquitetura do Sistema
 
 ### Visão Geral
-O projeto visa desenvolver um sistema digital de gerenciamento de bibliotecas comunitárias, permitindo que bibliotecários e usuários tenham acesso facilitado a livros, empréstimos, eventos culturais e relatórios de uso. O sistema será acessível via web e dispositivos móveis.
+O sistema adota uma **Arquitetura Monolítica Modular** baseada no padrão **MVT (Model-View-Template)** do Flask. Esta abordagem unifica o backend e a renderização do frontend no servidor, garantindo maior segurança, SEO facilitado e performance em dispositivos antigos.
 
-O escopo do sistema foi definido a partir do processo de Engenharia de Requisitos, que incluiu as etapas de elicitação, análise, especificação e validação para garantir que as necessidades dos stakeholders fossem compreendidas e traduzidas em funcionalidades. 
+### Componentes Principais
+1.  **Controller (`app.py`):** Gerencia as rotas, autenticação de sessão, lógica de permissões (ACL) e regras de negócio.
+2.  **Model (SQLite):** Camada de persistência de dados (Tabelas: Usuários, Livros, Eventos).
+3.  **Template (`templates/`):** Gera o HTML dinâmico enviado ao cliente, utilizando Bootstrap para responsividade.
 
-Os requisitos foram classificados em Funcionais (RF), que descrevem o que o sistema deve fazer, e Não Funcionais (RNF), que definem como o sistema deve operar, abordando atributos de qualidade como desempenho, usabilidade e segurança.
+### Integrações
+- Integração nativa com sistema de arquivos para persistência do banco de dados (SQLite).
+- Integração com CDN do Bootstrap para estilização responsiva automática.
 
-O detalhamento completo dos requisitos, incluindo regras de negócio e perfis de usuário, encontra-se no documento `docs/requisitos/requerimentos.md.`
+---
 
- ## Levantamento e Organização das Funcionalidades
+## 5. Instruções de Instalação e Execução
 
-* Cadastro, atualização e consulta de usuários (leitores e administradores).
-* Registro e controle de empréstimos e devoluções de livros.
-* Consulta de livros disponíveis, com filtros por título, autor e categoria.
-* Cadastro, divulgação e participação em eventos culturais.
-* Geração de relatórios e estatísticas sobre livros, usuários, empréstimos e participação em eventos.
+### Pré-requisitos
+- Python 3.10 ou superior instalado.
+- Git instalado.
 
- ## Definição da Arquitetura
+### Passo a Passo
+1.  **Clone o repositório:**
+    ```bash
+    git clone [https://github.com/](https://github.com/)[SEU_USUARIO]/N708_ProjetoFinal.git
+    cd N708_ProjetoFinal
+    ```
 
-* Backend baseado em RESTful para servir os dados de usuários, livros, empréstimos e eventos.
-* Frontend web responsivo, com design de interface para dispositivos móveis.
-* Banco de dados relacional (PostgreSQL) para persistência dos dados e controle de integridade.
+2.  **Crie e ative o ambiente virtual:**
+    * **Windows:**
+        ```bash
+        python -m venv venv
+        .\venv\Scripts\activate
+        ```
+    * **Linux/Mac:**
+        ```bash
+        python3 -m venv venv
+        source venv/bin/activate
+        ```
 
- ## Modelagem de Dados 
+3.  **Instale as dependências:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-* Criação de diagrama ER representando usuários, livros, empréstimos e eventos culturais.
-* Especificação dos endpoints, incluindo métodos, parâmetros de requisição e formatos de resposta (JSON).
+4.  **Execute o Sistema:**
+    ```bash
+    python backend/src/app.py
+    ```
+    *Nota: O arquivo do banco de dados `biblioteca.db` será criado e populado automaticamente na primeira execução.*
 
- ## Prototipação de Interfaces
+---
 
-* Desenvolvimento de protótipos de interface para web e mobile.
-* Validação dos fluxos de usuário com base no Design Centrado no Usuário (UCD).
+## 6. Acesso ao Sistema
 
- ## Visão Geral da Arquitetura
+Após iniciar o servidor, acesse no seu navegador:
+**URL Local:** `http://127.0.0.1:5000`
 
- O sistema de gerenciamento de bibliotecas comunitárias será baseado em uma arquitetura cliente-servidor em três camadas, garantindo escalabilidade, manutenção facilitada e segurança dos dados.
+### Credenciais de Teste
+| Perfil | Email | Senha | Permissões |
+|---|---|---|---|
+| **Administrador** | `admin@email.com` | `admin123` | Cadastrar livros e eventos. |
+| **Leitor** | `leitor@email.com` | `123456` | Visualizar acervo e agenda. |
 
-### Camadas do Sistema
- 1. Frontend (Interface do Usuário)
-  * Desenvolvido em React, com interface web responsiva e compatível com dispositivos móveis.
-  * Fornece funcionalidades como: busca de livros, cadastro de usuários, registro de empréstimos, consulta a eventos e relatórios.
+**Vídeo Demonstrativo:** [COLE O LINK DO SEU VÍDEO NO YOUTUBE/DRIVE AQUI]
 
- 2.  Backend (Camada de Aplicação)
-  * Desenvolvido em Node.js com Express.js, atuando como API RESTful.
-      Responsável por:
-       * Processar requisições dos clientes.
-       * Aplicar regras de negócio (ex.: controle de empréstimos e devoluções).
-       * Gerenciar autenticação e autorização via JWT.
-       * Garantir integridade dos dados e comunicação segura com o banco de dados.
+---
 
-3. Banco de Dados (Camada de Persistência)
+## 7. Validação com Público-Alvo
 
-  * Implementado em PostgreSQL com uso de ORM (Sequelize ou Prisma).
-  * Armazena dados de usuários, livros, empréstimos, eventos culturais e participação.
-  * Permite consultas rápidas, integridade referencial e relatórios confiáveis.
+### Definição do Público-Alvo
+- **Perfil:** Arthur Nogueira Soares (25 anos).
+- **Ocupação:** Advogado e morador do bairro Mucuripe (Fortaleza/CE).
+- **Contexto:** Representa o usuário final qualificado, que busca acesso à cultura na comunidade mas exige transparência legal e usabilidade.
 
-### Diagrama de Arquitetura
+### Resumo do Processo
+A validação ocorreu via videoconferência com demonstração guiada das telas. O foco foi verificar a aderência às necessidades locais e conformidade com a LGPD.
 
-```mermaid
-graph TD
-    subgraph "Cliente"
-        A[Usuário]
-    end
+### Principais Feedbacks e Ajustes Realizados
+1.  **Feedback Jurídico (LGPD):** "Falta clareza sobre o uso dos dados de endereço no cadastro."
+    * **Ajuste Implementado:** Criação de *checkbox* obrigatório de "Termos de Uso" no formulário de cadastro.
+2.  **Feedback de Usabilidade:** "Não sei se o livro está na estante só olhando a lista."
+    * **Ajuste Implementado:** Inclusão de indicador visual (`Disponível` em verde / `Emprestado` em vermelho) nos cards de livros.
+3.  **Feedback de Inclusão:** "Faltam informações de acessibilidade para idosos nos eventos."
+    * **Ajuste Implementado:** Adição de campo informativo "Local Acessível" na listagem de eventos.
 
-    subgraph "Camada de Apresentação"
-        B["Aplicação React <br>(Web/Mobile)"]
-    end
+*Documentação completa, evidências (fotos/termos) e relatório detalhado estão na pasta `validation/` deste repositório.*
 
-    subgraph "Camada de Aplicação"
-        C["API REST <br>Node.js/Express"]
-    end
+---
 
-    subgraph "Camada de Persistência"
-        D[(Banco de Dados PostgreSQL)]
-    end
+## 8. Equipe de Desenvolvimento
 
-    A -- Interage com --> B
-    B -- "Requisições HTTP/JSON" --> C
-    C -- "Consulta e persiste dados (via ORM)" --> D
-```
-
-## Tecnologias Propostas
-
-* Frontend: React, Axios, TailwindCSS 
-* Backend: Node.js, Express.js, JWT (autenticação) 
-* Banco de Dados: PostgreSQL
-* Prototipação: Figma
-
-## Cronograma para Etapa 2 (N708):
-
-No primeiro mês, o foco será no setup e no desenvolvimento do backend. Nas duas primeiras semanas, a equipe irá configurar o ambiente de desenvolvimento e a estrutura do projeto, iniciando a criação dos endpoints de autenticação e usuários. Nas duas semanas seguintes, o trabalho no backend continuará com a implementação das APIs para a gestão de livros, empréstimos e eventos.
-
-O segundo mês será dedicado ao desenvolvimento do frontend. As semanas cinco e seis serão utilizadas para criar as telas de login, cadastro e perfil de usuário. Logo após, entre as semanas sete e oito, o foco será a implementação das interfaces principais do sistema, como as telas para visualização e cadastro de livros, empréstimos e eventos.
-
-No terceiro e último mês, as atividades se concentrarão na integração, testes e finalização. Durante as semanas nove e dez, o frontend será conectado às APIs do backend e serão iniciados os testes de integração. As duas últimas semanas serão reservadas para a realização de testes completos, ajustes finais de usabilidade e a preparação do projeto para a apresentação final da disciplina.
-
-## Integrantes da Equipe
-
-Daniel Alves Fabrício (Matrícula: 2326208) - Gerente de Projeto e Arquiteto de Software
-
-Francisco Eduardo Nogueira Nobre (Matrícula: 2326181) - Desenvolvedor Backend
-
-Ayala Rodrigues Freire (Matrícula: 2323803) - Desenvolvedora Backend
-
-Manuela Rocha Trigueiro Asfor (Matrícula: 2316545) - Desenvolvedora Frontend e UI/UX Designer
-
-Samara Lima Queiroz (Matrícula: 2325659) - Desenvolvedora Frontend e Analista de QA
+* **[AYALA RODRIGUES FREIRE]** - Matrícula: [2323803]
+    * **Papel:** Desenvolvedor Fullstack e Líder Técnico.
+    * **Contribuição:** Implementação do Backend (Python/Flask), Frontend (Bootstrap), Testes Automatizados e Migração de Arquitetura.
