@@ -206,6 +206,11 @@ def adicionar_evento():
 # ROTA ATUALIZADA: Alternar status (para devolução)
 @app.route('/livros/emprestar/<int:livro_id>')
 def alternar_emprestimo(livro_id):
+    """
+    Rota responsável por alternar o status de um livro.
+    - Se disponível -> Marca como emprestado.
+    - Se emprestado -> Marca como devolvido (Apenas Admin).
+    """
     if 'usuario' not in session: return redirect(url_for('login'))
     
     conn = get_db_connection()
@@ -245,6 +250,9 @@ if not os.path.exists(os.path.dirname(DB_PATH)):
 
 init_db() 
 # -------------------------------------------------------------
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 if __name__ == '__main__':
     # Só roda se você executar 'python app.py' no seu computador

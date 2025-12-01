@@ -46,7 +46,7 @@ class BaseTestCase(unittest.TestCase):
             try:
                 os.remove(self.test_db_path)
             except PermissionError:
-                pass # Às vezes o Windows segura o arquivo por alguns milissegundos
+                pass # as vezes o Windows segura o arquivo por alguns milissegundos
 
     def login(self, email, senha):
         """Helper para realizar login nos testes"""
