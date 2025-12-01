@@ -30,7 +30,7 @@ Abaixo apresentamos os requisitos planejados na Etapa 1 e o status de sua implem
 ### 3.2 Consultas e Relatórios
 | ID | Descrição Original | Status na Entrega | Observação |
 |:---:|---|:---:|---|
-| **RF06** | Permitir a busca de livros por título, autor ou categoria. | ✅ **Implementado** | Busca textual em tempo real implementada. |
+| **RF06** | Permitir a busca de livros por título, autor ou categoria. | ✅ **Implementado** | Busca universal implementada no backend (SQL OR). |
 | **RF07** | Exibir histórico de empréstimos por usuário. | ❌ **Despriorizado** | Foco mantido na visualização do acervo atual disponível para a comunidade. |
 | **RF08** | Gerar relatórios básicos de livros. | 🔄 **Adaptado** | A própria listagem filtrável serve como relatório de acervo em tempo real. |
 
