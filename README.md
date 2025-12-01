@@ -109,7 +109,7 @@ Após iniciar o servidor, acesse no seu navegador:
 | **Administrador** | `admin@email.com` | `admin123` | Cadastrar livros e eventos. |
 | **Leitor** | `leitor@email.com` | `123456` | Visualizar acervo e agenda. |
 
-**Vídeo Demonstrativo:** [COLE O LINK DO SEU VÍDEO NO YOUTUBE/DRIVE AQUI]
+**versão em produção(Railway):** web-production-f806.up.railway.app
 
 ---
 
