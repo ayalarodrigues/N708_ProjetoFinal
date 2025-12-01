@@ -102,6 +102,14 @@ O sistema adota uma **Arquitetura Monolítica Modular** baseada no padrão **MVT
     ```
     *Nota: O arquivo do banco de dados `biblioteca.db` será criado e populado automaticamente na primeira execução.*
 
+### Executando Testes Automatizados
+O projeto inclui uma suíte de testes (Unitários e de Integração) para validar login, segurança e banco de dados.
+* **Comando:**
+    ```bash
+    python -m unittest tests/test_app.py
+    ```
+* **Resultado Esperado:** `OK` (Todos os testes passaram).
+
 ### Configuração para Deploy (Railway)
 O repositório já inclui os arquivos necessários para deploy automático:
 - **`Procfile`**: Instrução de inicialização (`web: gunicorn --chdir backend/src app:app`).
