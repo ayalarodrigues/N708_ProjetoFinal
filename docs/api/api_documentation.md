@@ -22,7 +22,7 @@ Este documento detalha os endpoints do controlador principal (`app.py`). O siste
 | ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------- | --------- |
 | `GET`  | `/livros`                | Lista todo o acervo com indicadores visuais de status.                                                     | Logado    |
 | `GET`  | `/livros?q={termo}`      | **Busca Universal:** Filtra por Título, Autor ou Categoria.                                                | Logado    |
-| `GET`  | `/livros/emprestar/{id}` | Alterna o status do livro (Disponível ↔ Emprestado). <br>*Nota: A devolução é restrita a Administradores.* | Logado    |
+| `GET`  | `/livros/emprestar/{id}` | **Alternar Status (Toggle):**<br>1. Se disponível: Registra empréstimo para o usuário logado.<br>2. Se emprestado: Realiza devolução (Ação restrita a **Administradores** para conferência física). | Logado |
 | `GET`  | `/livros/adicionar`      | Exibe formulário de cadastro de livro.                                                                     | **Admin** |
 | `POST` | `/livros/adicionar`      | Salva o novo livro no banco de dados.                                                                      | **Admin** |
 
