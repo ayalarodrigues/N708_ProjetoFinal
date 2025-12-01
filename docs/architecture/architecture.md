@@ -69,3 +69,7 @@ Unificar Frontend e Backend em uma única linguagem (Python) facilita a transfer
  
 Unificar frontend e backend em Python reduz a curva de aprendizagem e facilita a continuidade por voluntários e futuros desenvolvedores.
 
+### Padronização de Interface (UI Framework)
+Em relação aos protótipos de baixa/alta fidelidade da Etapa 1, optou-se pela implementação utilizando o framework **Bootstrap 5**.
+* **Motivo:** Garantir acessibilidade nativa (contraste, tamanhos de toque), responsividade robusta em todos os dispositivos móveis e facilitar a manutenção do código por desenvolvedores futuros, evitando "CSS proprietário" complexo. O layout segue a estrutura lógica dos protótipos, mas adota os componentes visuais padrão do Bootstrap para maior consistência.
+
