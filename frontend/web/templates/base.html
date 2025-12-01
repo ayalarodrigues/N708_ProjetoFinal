@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Biblioteca Comunitária</title>
+    <style>
+        body { font-family: sans-serif; background-color: #B0C4DE; margin: 0; padding: 0; text-align: center;}
+        .container { max-width: 400px; margin: 50px auto; background: rgba(255,255,255,0.2); padding: 20px; border-radius: 15px; }
+        input { width: 90%; padding: 10px; margin: 10px 0; border-radius: 10px; border: none; }
+        button { background-color: #D3D3D3; padding: 10px 30px; border-radius: 15px; border: none; cursor: pointer; }
+        .card { background-color: #ADD8E6; padding: 15px; margin: 10px 0; border-radius: 10px; text-align: left; }
+        .nav { margin-bottom: 20px; }
+        .status-livro { font-weight: bold; color: green; } /* Feedback visual do Arthur */
+    </style>
+</head>
+<body>
+    {% block content %}{% endblock %}
+</body>
+</html>

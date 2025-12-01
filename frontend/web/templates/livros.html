@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <h2>Livros</h2>
+        <input type="text" placeholder="Pesquisar">
+        
+        {% for livro in livros %}
+        <div class="card">
+            <strong>{{ livro['titulo'] }}</strong><br>
+            <small>{{ livro['categoria'] }} | {{ livro['autor'] }}</small><br>
+            <span class="status-livro">● Disponível</span> 
+        </div>
+        {% endfor %}
+        
+        <p><a href="{{ url_for('home') }}">Voltar</a></p>
+    </div>
+{% endblock %}
