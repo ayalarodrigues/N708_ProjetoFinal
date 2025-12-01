@@ -1,17 +1,45 @@
 {% extends 'base.html' %}
 {% block content %}
-    <div class="container">
-        <h2>Livros</h2>
-        <input type="text" placeholder="Pesquisar">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Acervo de Livros</h2>
         
+        {% if session.get('perfil') == 'admin' %}
+            <a href="{{ url_for('adicionar_livro') }}" class="btn btn-success">+ Novo Livro</a>
+        {% endif %}
+    </div>
+
+    <form class="d-flex mb-4" method="GET" action="{{ url_for('livros') }}">
+        <input class="form-control me-2" type="search" name="q" placeholder="Pesquisar por título..." aria-label="Search">
+        <button class="btn btn-outline-primary" type="submit">Pesquisar</button>
+        <a href="{{ url_for('livros') }}" class="btn btn-outline-secondary ms-2">Limpar</a>
+    </form>
+
+    <div class="row">
         {% for livro in livros %}
-        <div class="card">
-            <strong>{{ livro['titulo'] }}</strong><br>
-            <small>{{ livro['categoria'] }} | {{ livro['autor'] }}</small><br>
-            <span class="status-livro">● Disponível</span> 
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h5 class="card-title">{{ livro['titulo'] }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{ livro['autor'] }}</h6>
+                <p class="card-text"><small>{{ livro['categoria'] }}</small></p>
+                
+                <div class="mt-2">
+                    {% if livro['disponivel'] %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-danger">Emprestado</span>
+                    {% endif %}
+                </div>
+            </div>
         </div>
+        {% else %}
+            <div class="col-12 text-center text-muted mt-5">
+                <h4>📭 Nenhum livro encontrado.</h4>
+                <p>Tente buscar por outro termo ou limpe a pesquisa.</p>
+            </div>
         {% endfor %}
-        
-        <p><a href="{{ url_for('home') }}">Voltar</a></p>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">Voltar</a>
     </div>
 {% endblock %}
