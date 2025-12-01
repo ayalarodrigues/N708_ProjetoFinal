@@ -19,7 +19,7 @@ class BaseTestCase(unittest.TestCase):
         app_module.app.secret_key = 'test_secret_key'
         self.app = app_module.app.test_client()
         
-        # --- MÁGICA DO BANCO ISOLADO ---
+        # --- BANCO ISOLADO ---
         # 1. Salva o caminho do banco original para não estragar
         self.db_path_original = app_module.DB_PATH
         # 2. Define um nome para o banco temporário de teste
