@@ -134,7 +134,7 @@ Após iniciar o servidor: `http://127.0.0.1:5000`
 | **Administrador** | `admin@email.com` | `admin123` | Cadastrar livros e eventos. |
 | **Leitor** | `leitor@email.com` | `123456` | Visualizar acervo e agenda. |
 
-**Vídeo Demonstrativo:** [COLE O LINK DO SEU VÍDEO NO YOUTUBE/DRIVE AQUI]
+**Vídeo Demonstrativo:** [https://drive.google.com/file/d/1QuFmyBR74tUWrDzE21Swuu-cCS9cLwfx/view?usp=sharing]
 
 ---
 
