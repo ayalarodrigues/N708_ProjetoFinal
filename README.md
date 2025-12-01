@@ -21,9 +21,9 @@ Abaixo, a lista de funcionalidades entregues nesta etapa, com status de implemen
 - [x] **Interface Responsiva:** Layout adaptável para dispositivos móveis (Smartphones/Tablets) e Desktops.
 
 ### Screenshots das Telas Principais
-- **Tela de Login:** ![Login](prototypes/Captura%20de%20tela%202025-09-28%20215604.png)
-- **Listagem de Livros:** ![Livros](prototypes/Figma%20tela%206%20web.png)
-- **Painel de Eventos:** ![Eventos](prototypes/Figma%20tela%205%20web.png)
+- **Tela de Login:** ![Login](docs/img/login.png)
+- **Listagem de Livros:** ![Livros](docs/img/livros.png)
+- **Painel de Eventos:** ![Eventos](docs/img/eventos.png)
 
 ---
 
