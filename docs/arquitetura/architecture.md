@@ -1,127 +1,71 @@
-# Arquitetura do Sistema - Biblioteca Comunitária
+# Arquitetura do Sistema — Biblioteca Comunitária
 
 ## 1. Visão Geral
-O sistema de gerenciamento da biblioteca comunitária será baseado em uma arquitetura **cliente-servidor** de três camadas:
 
-- **Frontend (React):** Interface do usuário, acessada via navegador.
-- **Backend (Node.js + Express):** Camada de aplicação responsável pela lógica de negócio e APIs REST.
-- **Banco de Dados (PostgreSQL):** Camada de persistência de dados.
+O sistema evoluiu de uma arquitetura baseada em **microserviços** (React + Node API) para uma **Arquitetura Monolítica Modular**, seguindo o padrão **MVT (Model–View–Template)** com o framework **Flask (Python)**.
+
+A mudança foi motivada por:
+
+- Redução da complexidade de manutenção  
+- Maior segurança no tráfego de dados (renderização server-side)  
+- Agilidade no desenvolvimento e validação com os usuários finais  
 
 ---
 
 ## 2. Diagrama de Arquitetura
 
-[Usuário] ⇄ [Frontend React] ⇄ [APIs REST em Node.js/Express] ⇄ [Banco PostgreSQL]
+O diagrama abaixo ilustra o fluxo de dados na arquitetura MVT adotada:
 
----
+```mermaid
+graph TD
+    subgraph "Cliente (Navegador)"
+        A[Browser / Mobile]
+    end
 
+    subgraph "Servidor (Python/Flask)"
+        B[Controller / Rotas - app.py]
+        C[Template Engine - Jinja2]
+        D[ORM / Modelagem de Dados]
+    end
+
+    subgraph "Persistência"
+        E[(Banco de Dados SQLite)]
+    end
+
+    %% Fluxo de Dados
+    A -- "1. Requisição HTTP (GET/POST)" --> B
+    B -- "2. Processa Lógica" --> D
+    D -- "3. Consulta / Grava" --> E
+    E -- "4. Retorna Dados" --> D
+    D -- "5. Envia Objetos" --> B
+    B -- "6. Injeta Dados no Template" --> C
+    C -- "7. Renderiza HTML" --> B
+    B -- "8. Resposta HTML/CSS" --> A
+
+````
 ## 3. Tecnologias Selecionadas
-- **Frontend:** React, Axios (para chamadas API), TailwindCSS (para UI).
-- **Backend:** Node.js, Express.js, JWT (para autenticação), bcrypt (para hash de senhas).
-- **Banco de Dados:** PostgreSQL, Sequelize/Prisma (ORM).
-- **Ambiente:** Windows 10/11 (desenvolvimento), com possibilidade de migração para servidor Linux.
+
+- **Linguagem:** Python 3.10+ — Alta legibilidade e robustez.
+- **Framework Web:** Flask — Microframework flexível.
+- **Frontend:** HTML5, CSS3 (Bootstrap 5 via CDN) e Jinja2.
+- **Banco de Dados:** SQLite — Nativo, serverless, ideal para a escala de bibliotecas comunitárias.
+- **Hospedagem:** Preparado para deploy em contêineres ou serviços como Render/PythonAnywhere.
 
 ---
 
-## 4. Componentes Principais
-- **Gerenciamento de Usuários:** CRUD de leitores e administradores.
-- **Gerenciamento de Livros:** CRUD de obras (título, autor, categoria, exemplares).
-- **Controle de Empréstimos:** Registro de empréstimos e devoluções, controle de atrasos.
-- **Eventos Culturais:** Cadastro e divulgação de eventos.
-- **Relatórios:** Consultas sobre livros, usuários e empréstimos.
+## 4. Justificativa de Mudanças  
+*(Relação N705 → N708)*
 
----
+Conforme permitido no edital da disciplina, ocorreram ajustes arquiteturais justificados por:
 
-## 5. Modelo de Banco de Dados (ERD)
+### Segurança e LGPD  
+O tratamento de sessões e dados sensíveis no lado do servidor (Server-Side) simplificou a conformidade com a LGPD, um requisito identificado durante a avaliação jurídica.
 
-### Entidades e Relacionamentos
-- **Usuário**
-  - id_usuario (PK)
-  - nome
-  - cpf
-  - telefone
-  - endereco
-  - email
-  - senha (hash)
-  - perfil (administrador ou leitor)
+### Interoperabilidade  
+O uso de SQLite elimina a necessidade de instalação de servidores de banco complexos (como PostgreSQL) nas máquinas das bibliotecas comunitárias, que geralmente possuem hardware limitado.
 
-- **Livro**
-  - id_livro (PK)
-  - titulo
-  - autor
-  - categoria
-  - ano_publicacao
-  - exemplares_total
-  - exemplares_disponiveis
+### Manutenibilidade  
+Unificar Frontend e Backend em uma única linguagem (Python) facilita a transferência de conhecimento para futuros mantenedores voluntários do projeto.
+ 
+Unificar frontend e backend em Python reduz a curva de aprendizagem e facilita a continuidade por voluntários e futuros desenvolvedores.
 
-- **Emprestimo**
-  - id_emprestimo (PK)
-  - id_usuario (FK → Usuario.id_usuario)
-  - id_livro (FK → Livro.id_livro)
-  - data_emprestimo
-  - data_devolucao_prevista
-  - data_devolucao_real
-  - status (ativo, devolvido, atrasado)
-
-- **Evento**
-  - id_evento (PK)
-  - titulo
-  - descricao
-  - data_evento
-  - local
-
-- **ParticipacaoEvento**
-  - id_participacao (PK)
-  - id_usuario (FK → Usuario.id_usuario)
-  - id_evento (FK → Evento.id_evento)
-
----
-
-## 6. Diagrama ER (Descrição)
-
-```plaintext
-┌────────────┐       ┌──────────────┐
-│   Usuario  │1     n│  Emprestimo  │
-│────────────│-------│──────────────│
-│ id_usuario │       │ id_emprestimo│
-│ nome       │       │ id_usuario FK│
-│ cpf        │       │ id_livro FK  │
-│ telefone   │       │ data_emp     │
-│ endereco   │       │ data_prev    │
-│ email      │       │ data_real    │
-│ senha      │       │ status       │
-│ perfil     │       └──────────────┘
-└────────────┘
-        │1
-        │
-        │n
-┌────────────┐
-│   Evento   │
-│────────────│
-│ id_evento  │
-│ titulo     │
-│ descricao  │
-│ data_evento│
-│ local      │
-└────────────┘
-        │1
-        │
-        │n
-┌──────────────────┐
-│ ParticipacaoEvento│
-│──────────────────│
-│ id_participacao   │
-│ id_usuario (FK)   │
-│ id_evento (FK)    │
-└──────────────────┘
-
-┌───────────┐
-│   Livro   │
-│───────────│
-│ id_livro  │
-│ titulo    │
-│ autor     │
-│ categoria │
-│ ano_pub   │
-│ exemplares│
-└───────────┘
