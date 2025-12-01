@@ -1,84 +1,59 @@
 # Relatório de Validação com Público-Alvo
 
-### Perfil 1: Representante Jurídico e Morador
+## 1. Perfil do Validador e Contexto
 
-### 1. Metodologia
+A validação foi conduzida com um representante estratégico da comunidade, selecionado para garantir que o sistema atenda tanto às necessidades locais quanto aos requisitos legais de proteção de dados.
 
-A validação foi realizada no dia **22/11/2025**, através de videoconferência via **Google Meet**, dada a disponibilidade do entrevistado.
-
-A técnica utilizada foi a de **Entrevista com Demonstração Guiada (Screen Sharing)**:
-
-- **Apresentação:** O entrevistador compartilhou a tela apresentando o contexto do projeto e os objetivos da Biblioteca Comunitária.  
-- **Navegação Assistida:** O entrevistador navegou pelo protótipo/sistema enquanto o entrevistado solicitava ações e fazia perguntas (“Clique ali”, “O que acontece se eu fizer isso?”).  
-- **Coleta de Dados:** As observações e feedbacks foram anotados em tempo real pelo entrevistador durante a chamada.
+* **Nome:** Arthur Nogueira Soares
+* **Perfil:** Morador do bairro Mucuripe e Advogado.
+* **Justificativa:** Sua inserção na comunidade valida a usabilidade para o público final, enquanto sua formação jurídica oferece uma auditoria sobre a conformidade do sistema (LGPD), essencial para a segurança da instituição.
 
 ---
 
-### 2. Feedbacks Coletados
+## 2. Metodologia
 
-Durante a sessão no Google Meet, o usuário **Arthur Nogueira Soares** pontuou as seguintes observações críticas:
-
-#### **Feedback 1: Termos e LGPD (Visão Jurídica)**
-
-- **Contexto:** Tela de Cadastro de Usuário.  
-- **Comentário do usuário:**  
-  “Eu vi que vocês pedem Endereço. Como advogado, sinto falta de um 'li e concordo' ou de um link para os termos de uso. Eu preciso saber como a biblioteca vai usar meu endereço e quais são as regras se eu atrasar um livro. Tem multa? Eu fico bloqueado?”  
-- **Criticidade:** Alta.
+* **Data:** 22/11/2025
+* **Formato:** Videoconferência via Google Meet (Devido à disponibilidade do entrevistado).
+* **Técnica:** Entrevista com Demonstração Guiada (*Walkthrough*). O entrevistador compartilhou a tela e navegou pelo sistema em tempo real, solicitando ao usuário que descrevesse suas impressões e dúvidas a cada funcionalidade apresentada.
+* **Evidências:** As capturas de tela da sessão e o Termo de Uso de Imagem assinado encontram-se na pasta `validation/evidence/`.
 
 ---
 
-#### **Feedback 2: Clareza no Status do Livro**
+## 3. Feedbacks Coletados e Análise
 
-- **Contexto:** Tela de Listagem/Busca de Livros.  
-- **Comentário do usuário:**  
-  “A lista de livros está bonita, mas olhando aqui para 'Dom Casmurro', eu não sei se ele está na estante agora ou se alguém levou. Eu teria que ir até a biblioteca só para descobrir que não tem?”  
-- **Criticidade:** Média.
+Durante a sessão, foram identificados três pontos críticos que exigiram intervenção na equipe de desenvolvimento:
 
----
+### Feedback 1: Transparência e LGPD (Crítico)
+* **Contexto:** Tela de Cadastro de Usuário.
+* **Comentário do Usuário:** *"Eu vi que vocês pedem Endereço. Como advogado, sinto falta de um 'li e concordo'. Eu preciso saber como a biblioteca vai usar meu endereço. Sem isso, a biblioteca corre risco jurídico."*
+* **Análise:** O sistema original coletava dados sensíveis sem consentimento explícito, violando princípios da LGPD.
 
-### **Feedback 3: Detalhes do Evento e Acessibilidade**
+### Feedback 2: Clareza no Status do Livro (Médio)
+* **Contexto:** Listagem de Livros.
+* **Comentário do Usuário:** *"A lista está bonita, mas olhando para 'Dom Casmurro', eu não sei se ele está na estante agora ou se o vizinho pegou. Eu teria que ir até lá só para descobrir?"*
+* **Análise:** A interface não comunicava a disponibilidade imediata, frustrando o objetivo de evitar deslocamentos desnecessários (ODS 11).
 
-- **Contexto:** Tela de Visualização de Eventos (Oficina de Leitura).  
-- **Comentário do usuário:**  
-  “Moro aqui no Mucuripe e é difícil achar estacionamento ou saber exatamente onde ficam as salas comunitárias. Na descrição do evento seria ótimo ter uma referência mais exata do local ou se tem acessibilidade, pois gostaria de levar minha mãe que é idosa.”  
-- **Criticidade:** Baixa (Melhoria de Usabilidade).
-
----
-
-### 3. Ajustes Implementados e Melhorias
-
-Com base nas anotações feitas durante a entrevista, a equipe realizou as seguintes alterações no sistema:
-
-#### **Inclusão de Checkbox de Termos (Feedback 1)**
-
-- Adicionado um checkbox obrigatório no formulário de cadastro:  
-  **“Declaro que li e concordo com as regras de empréstimo da biblioteca.”**
-- **Alteração técnica:** Atualização no Frontend (React) e validação no Backend para impedir o cadastro sem o aceite explícito.
+### Feedback 3: Acessibilidade nos Eventos (Baixo/Melhoria)
+* **Contexto:** Detalhes do Evento.
+* **Comentário do Usuário:** *"Moro aqui no Mucuripe e é difícil saber onde ficam as salas. Seria ótimo saber se tem acessibilidade, pois gostaria de levar minha mãe que é idosa."*
+* **Análise:** Falta de informações inclusivas limitava o público-alvo dos eventos.
 
 ---
 
-#### **Indicador Visual de Disponibilidade (Feedback 2)**
+## 4. Ajustes Implementados (Correções)
 
-Na listagem de livros foi adicionada uma etiqueta visual:
+Com base nos feedbacks, as seguintes alterações foram realizadas no código (Python/Flask):
 
-- **Verde:** Disponível para empréstimo  
-- **Vermelho:** Indisponível / Emprestado
-
-**Alteração técnica:** A API de listagem de livros foi ajustada para retornar o status calculado dinamicamente com base nos exemplares disponíveis (Atendendo aos requisitos RF01/RF06).
-
----
-
-#### **Enriquecimento da Descrição de Eventos (Feedback 3)**
-
-- Alterado o layout do card de eventos para permitir descrições mais completas.  
-- Incluídos campos opcionais para:
-  - **Ponto de Referência**
-  - **Informações de Acessibilidade**
+| Feedback | Solução Implementada | Alteração Técnica |
+|---|---|---|
+| **1. LGPD** | **Checkbox Obrigatório:** Inclusão de campo "Li e concordo com os termos" no cadastro. | Adicionado campo `termos` no formulário HTML e validação condicional no backend (`app.py`) que impede o registro sem o aceite. |
+| **2. Status** | **Indicador Visual:** Etiquetas coloridas nos cards de livros. | Lógica no template (`livros.html`) que renderiza `<span class="badge bg-success">Disponível</span>` ou `<span class="badge bg-danger">Emprestado</span>` baseado no banco de dados. |
+| **3. Inclusão** | **Info de Acessibilidade:** Novo campo nos eventos. | Adicionado atributo "Local Acessível" na modelagem de eventos e exibição destacada no card do evento (`eventos.html`). |
 
 ---
 
-## 4. Conclusão
+## 5. Conclusão
 
-A validação com um morador do Mucuripe e profissional da área jurídica trouxe uma visão crítica sobre a transparência das regras do sistema, algo que não havia sido mapeado inicialmente pela equipe técnica.  
+A validação externa foi fundamental para amadurecer o projeto. O olhar jurídico do usuário Arthur impediu que o sistema fosse lançado com vulnerabilidades legais (LGPD), enquanto sua visão de morador direcionou o foco para a "disponibilidade real" dos livros.
 
-As alterações implementadas aumentaram a **confiabilidade do software** e melhoraram a **experiência de busca do usuário**, evitando deslocamentos desnecessários até a biblioteca.
+O sistema final, ajustado pós-validação, é significativamente mais **seguro**, **transparente** e **inclusivo** do que a versão planejada inicialmente.
