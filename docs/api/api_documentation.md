@@ -1,41 +1,93 @@
-# Especificação de Rotas e Interface (Flask)
+# Documentação da Interface de Controle (Rotas)
 
-O sistema utiliza arquitetura RESTful nas rotas, porém retorna interfaces renderizadas (HTML) em vez de JSON puro, facilitando a indexação e a compatibilidade com navegadores antigos.
+Este documento detalha os endpoints do controlador principal (`app.py`). O sistema utiliza a arquitetura **MVT (Model-View-Template)**, onde as rotas processam a lógica de negócio e retornam templates HTML renderizados via Jinja2.
+
+---
 
 ## 1. Mapeamento de Rotas
 
 ### Autenticação e Usuários
-| Método | Rota | Descrição | Acesso |
-|---|---|---|---|
-| `GET` | `/login` | Exibe formulário de login | Público |
-| `POST` | `/login` | Processa credenciais e inicia sessão | Público |
-| `GET` | `/cadastro` | Exibe formulário de registro | Público |
-| `POST` | `/cadastro` | Cria novo usuário (Valida LGPD) | Público |
-| `GET` | `/logout` | Encerra sessão | Logado |
 
-### Gestão de Acervo
-| Método | Rota | Descrição | Acesso |
-|---|---|---|---|
-| `GET` | `/livros` | Lista acervo e status de disponibilidade | Logado |
-| `GET` | `/livros?q=termo` | Busca livros por título | Logado |
-| `GET` | `/livros/adicionar`| Exibe form de novo livro | **Admin** |
-| `POST` | `/livros/adicionar`| Salva novo livro no banco | **Admin** |
+| Método | Rota        | Descrição                                          | Acesso  |
+| ------ | ----------- | -------------------------------------------------- | ------- |
+| `GET`  | `/login`    | Exibe o formulário de autenticação.                | Público |
+| `POST` | `/login`    | Processa as credenciais e inicia a sessão segura.  | Público |
+| `GET`  | `/cadastro` | Exibe o formulário de registro de novos leitores.  | Público |
+| `POST` | `/cadastro` | Cria novo usuário no banco (Valida aceite LGPD).   | Público |
+| `GET`  | `/logout`   | Encerra a sessão atual e redireciona para o login. | Logado  |
+
+### Gestão de Acervo (Livros)
+
+| Método | Rota                     | Descrição                                                                                                  | Acesso    |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------- | --------- |
+| `GET`  | `/livros`                | Lista todo o acervo com indicadores visuais de status.                                                     | Logado    |
+| `GET`  | `/livros?q={termo}`      | **Busca Universal:** Filtra por Título, Autor ou Categoria.                                                | Logado    |
+| `GET`  | `/livros/emprestar/{id}` | Alterna o status do livro (Disponível ↔ Emprestado). <br>*Nota: A devolução é restrita a Administradores.* | Logado    |
+| `GET`  | `/livros/adicionar`      | Exibe formulário de cadastro de livro.                                                                     | **Admin** |
+| `POST` | `/livros/adicionar`      | Salva o novo livro no banco de dados.                                                                      | **Admin** |
 
 ### Eventos Culturais
-| Método | Rota | Descrição | Acesso |
-|---|---|---|---|
-| `GET` | `/eventos` | Lista agenda cultural | Logado |
-| `GET` | `/eventos/adicionar`| Exibe form de novo evento | **Admin** |
-| `POST` | `/eventos/adicionar`| Salva novo evento | **Admin** |
+
+| Método | Rota                 | Descrição                                           | Acesso    |
+| ------ | -------------------- | --------------------------------------------------- | --------- |
+| `GET`  | `/eventos`           | Lista a agenda cultural com info de acessibilidade. | Logado    |
+| `GET`  | `/eventos/adicionar` | Exibe formulário de criação de evento.              | **Admin** |
+| `POST` | `/eventos/adicionar` | Salva o novo evento na agenda.                      | **Admin** |
 
 ---
 
 ## 2. Estrutura de Dados (Formulários)
 
-Exemplo de Payload para Cadastro de Livro (`POST /livros/adicionar`):
+Como o sistema utiliza renderização no servidor, os dados são trafegados via `application/x-www-form-urlencoded` (Form Data).
+
+### Cadastro de Usuário (`POST /cadastro`)
+
+```python
+{
+    "nome": "String (Obrigatório)",
+    "email": "String (Obrigatório, Único)",
+    "senha": "String (Obrigatório)",
+    "endereco": "String (Obrigatório)",
+    "termos": "Checkbox (Deve estar marcado 'on' para validar LGPD)"
+}
+```
+
+### Cadastro de Livro (`POST /livros/adicionar`)
+
 ```python
 {
     "titulo": "String (Obrigatório)",
     "autor": "String (Obrigatório)",
-    "categoria": "String (Select: Romance, Técnico, etc)"
+    "categoria": "String (Select: Romance, Técnico, Infantil, etc)"
 }
+```
+
+### Cadastro de Evento (`POST /eventos/adicionar`)
+
+```python
+{
+    "titulo": "String (Obrigatório)",
+    "descricao": "String (Texto longo)",
+    "data": "Date (YYYY-MM-DD)",
+    "local": "String (Ex: Auditório, Sala 3)"
+}
+```
+
+### Filtros de Busca (`GET /livros`)
+
+```python
+{
+    "q": "String (Busca parcial em Título OR Autor OR Categoria)"
+}
+```
+
+---
+
+## 3. Códigos de Retorno HTTP
+
+Embora não seja uma API JSON, o sistema respeita os códigos de status HTTP para renderização:
+
+* **200 OK:** Página carregada com sucesso.
+* **302 Found:** Redirecionamento (ex: após login ou cadastro com sucesso).
+* **404 Not Found:** Recurso não encontrado (Página personalizada implementada).
+* **500 Internal Server Error:** Erro crítico no servidor.
