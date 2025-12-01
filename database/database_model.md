@@ -9,7 +9,6 @@ O banco de dados foi implementado utilizando **SQLite 3**. Esta escolha garante 
 
 O diagrama abaixo representa a estrutura lógica das entidades principais do sistema e seus relacionamentos. Na implementação física (SQLite), algumas restrições são gerenciadas pela camada de aplicação (Python/Flask) para garantir a integridade.
 
-*(A imagem `Diagrama ER.jpeg` presente na pasta `docs/database/` ilustra os relacionamentos conceituais planejados)*
 
 ---
 
