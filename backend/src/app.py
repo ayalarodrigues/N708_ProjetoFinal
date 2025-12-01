@@ -206,13 +206,14 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+# Isso garante que o banco seja criado mesmo rodando pelo Gunicorn no Railway
+if not os.path.exists(os.path.dirname(DB_PATH)):
+    os.makedirs(os.path.dirname(DB_PATH))
+
+init_db() 
+# -------------------------------------------------------------
+
 if __name__ == '__main__':
-    # Garante que a pasta do banco existe
-    if not os.path.exists(os.path.dirname(DB_PATH)):
-        os.makedirs(os.path.dirname(DB_PATH))
-
-    init_db()
-
-    # Pega a porta do ambiente (Railway) ou usa 5000 se for local
+    # Só roda se você executar 'python app.py' no seu computador
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
