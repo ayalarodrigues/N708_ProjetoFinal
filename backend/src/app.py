@@ -207,7 +207,12 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
+    # Garante que a pasta do banco existe
     if not os.path.exists(os.path.dirname(DB_PATH)):
         os.makedirs(os.path.dirname(DB_PATH))
+
     init_db()
-    app.run(debug=True, port=5000)
+
+    # Pega a porta do ambiente (Railway) ou usa 5000 se for local
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
