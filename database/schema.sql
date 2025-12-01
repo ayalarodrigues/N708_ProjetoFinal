@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS livros (
     titulo TEXT NOT NULL,
     categoria TEXT,
     autor TEXT,
-    disponivel BOOLEAN DEFAULT 1 -- 1 = Disponível, 0 = Indisponível
+    disponivel BOOLEAN DEFAULT 1, -- 1 = Disponível, 0 = Indisponível
+    emprestado_por TEXT -- Nome do usuário que pegou emprestado (Rastreabilidade)
 );
 
 CREATE TABLE IF NOT EXISTS eventos (
