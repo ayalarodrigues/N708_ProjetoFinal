@@ -21,9 +21,9 @@ Abaixo, a lista de funcionalidades entregues nesta etapa, com status de implemen
 - [x] **Interface Responsiva:** Layout adaptável para dispositivos móveis (Smartphones/Tablets) e Desktops.
 
 ### Screenshots das Telas Principais
-- **Tela de Login:** ![Login](docs/img/login.png)
-- **Listagem de Livros:** ![Livros](docs/img/livros.png)
-- **Painel de Eventos:** ![Eventos](docs/img/eventos.png)
+- **Tela de Login:** ![Login](prototypes/Captura%20de%20tela%202025-09-28%20215604.png)
+- **Listagem de Livros:** ![Livros](prototypes/Figma%20tela%206%20web.png)
+- **Painel de Eventos:** ![Eventos](prototypes/Figma%20tela%205%20web.png)
 
 ---
 
@@ -31,11 +31,16 @@ Abaixo, a lista de funcionalidades entregues nesta etapa, com status de implemen
 
 ### Linguagens e Frameworks
 - **Linguagem:** Python 3.10+
-- **Backend:** Flask (Microframework)
+- **Backend:** Flask 3.1.2 (Microframework)
 - **Frontend:** HTML5, CSS3 (Bootstrap 5 via CDN), Jinja2 (Templating Engine)
 
 ### Banco de Dados
 - **SQLite 3:** Banco de dados relacional serverless (arquivo `.db`). Escolhido pela portabilidade e facilidade de backup em computadores modestos, eliminando a necessidade de servidores dedicados.
+
+### Infraestrutura e Deploy
+- **Railway:** Plataforma de nuvem (PaaS) utilizada para hospedagem da aplicação.
+- **Gunicorn:** Servidor WSGI de produção para Python.
+- **Procfile:** Arquivo de configuração de inicialização para ambientes cloud.
 
 ### Ferramentas de Desenvolvimento
 - **Git/GitHub:** Versionamento de código.
@@ -66,7 +71,7 @@ O sistema adota uma **Arquitetura Monolítica Modular** baseada no padrão **MVT
 - Python 3.10 ou superior instalado.
 - Git instalado.
 
-### Passo a Passo
+### Passo a Passo (Instalação Local)
 1.  **Clone o repositório:**
     ```bash
     git clone [https://github.com/](https://github.com/)[SEU_USUARIO]/N708_ProjetoFinal.git
@@ -86,22 +91,33 @@ O sistema adota uma **Arquitetura Monolítica Modular** baseada no padrão **MVT
         ```
 
 3.  **Instale as dependências:**
+    O projeto utiliza um arquivo `requirements.txt` para garantir a compatibilidade das versões:
     ```bash
     pip install -r requirements.txt
     ```
 
-4.  **Execute o Sistema:**
+4.  **Execute o Sistema (Modo Desenvolvimento):**
     ```bash
     python backend/src/app.py
     ```
     *Nota: O arquivo do banco de dados `biblioteca.db` será criado e populado automaticamente na primeira execução.*
 
+### Configuração para Deploy (Railway)
+O repositório já inclui os arquivos necessários para deploy automático:
+- **`Procfile`**: Instrução de inicialização (`web: gunicorn --chdir backend/src app:app`).
+- **`requirements.txt`**: Lista de dependências incluindo `gunicorn`.
+- **Configuração de Porta:** O `app.py` está configurado para ler a variável de ambiente `$PORT`.
+
 ---
 
 ## 6. Acesso ao Sistema
 
-Após iniciar o servidor, acesse no seu navegador:
-**URL Local:** `http://127.0.0.1:5000`
+### Ambiente de Produção (Online)
+O sistema está hospedado e funcional no seguinte endereço:
+🔗 **[COLE O SEU LINK DO RAILWAY AQUI]**
+
+### Ambiente de Desenvolvimento (Local)
+Após iniciar o servidor: `http://127.0.0.1:5000`
 
 ### Credenciais de Teste
 | Perfil | Email | Senha | Permissões |
@@ -109,7 +125,7 @@ Após iniciar o servidor, acesse no seu navegador:
 | **Administrador** | `admin@email.com` | `admin123` | Cadastrar livros e eventos. |
 | **Leitor** | `leitor@email.com` | `123456` | Visualizar acervo e agenda. |
 
-**versão em produção(Railway):** web-production-f806.up.railway.app
+**Vídeo Demonstrativo:** [COLE O LINK DO SEU VÍDEO NO YOUTUBE/DRIVE AQUI]
 
 ---
 
@@ -138,5 +154,5 @@ A validação ocorreu via videoconferência com demonstração guiada das telas.
 ## 8. Equipe de Desenvolvimento
 
 * **[AYALA RODRIGUES FREIRE]** - Matrícula: [2323803]
-    * **Papel:** Desenvolvedor Fullstack e Líder Técnico.
-    * **Contribuição:** Implementação do Backend (Python/Flask), Frontend (Bootstrap), Testes Automatizados e Migração de Arquitetura.
+    * **Papel:** Desenvolvedora Fullstack e Líder Técnica.
+    * **Contribuição:** Implementação do Backend (Python/Flask), Frontend (Bootstrap), Testes Automatizados, Migração de Arquitetura e Deploy no Railway.
