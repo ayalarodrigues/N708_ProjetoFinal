@@ -2,32 +2,36 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3
 import os
 
-# --- CONFIGURAÇÕES INICIAIS ---
-# Aqui eu pego o caminho exato da pasta onde esse arquivo tá, pra não ter erro de "File not found"
+# --- CONFIGURAÇÕES DO PROJETO ---
+# Aqui eu pego o diretório atual pra garantir que o Python ache os arquivos
+# independente de onde o comando for rodado (evita erro de TemplateNotFound)
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Defino onde estão as pastas de HTML (templates) e CSS (static) voltando pastas (../../)
+# Aponto manualmente onde estão as pastas do frontend
 template_dir = os.path.join(base_dir, '../../frontend/web/templates')
 static_dir = os.path.join(base_dir, '../../frontend/web/static')
 
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
-app.secret_key = 'chave_super_secreta_projeto_unifor' # Chave pra criptografar a sessão do usuário
 
-# Caminho do banco de dados SQLite
+# Chave secreta necessária pro Flask gerenciar a sessão (cookies) com segurança
+app.secret_key = 'chave_super_secreta_projeto_unifor'
+
+# Defini o caminho do banco aqui pra ser fácil de achar
 DB_PATH = os.path.join(base_dir, '../../database/biblioteca.db')
 
-# Função auxiliar pra conectar no banco sem repetir código toda hora
+# Função auxiliar que criei pra não ficar repetindo a conexão toda hora
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row # Isso ajuda a pegar as colunas pelo nome (ex: user['email'])
+    # Isso é importante: permite acessar as colunas pelo nome (ex: livro['titulo'])
+    conn.row_factory = sqlite3.Row
     return conn
 
-# --- CRIAÇÃO DO BANCO ---
+# --- INICIALIZAÇÃO DO BANCO DE DADOS ---
 def init_db():
     with app.app_context():
         conn = get_db_connection()
         
-        # Criando a tabela de usuários. O perfil define se é admin ou leitor.
+        # Tabela de Usuários: O campo 'perfil' define se é admin ou leitor
         conn.execute('''
             CREATE TABLE IF NOT EXISTS usuarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,22 +39,23 @@ def init_db():
                 senha TEXT NOT NULL,
                 nome TEXT,
                 endereco TEXT,
-                perfil TEXT DEFAULT 'leitor' -- 'admin' ou 'leitor'
+                perfil TEXT DEFAULT 'leitor'
             );
         ''')
         
-        # Tabela de livros com o campo 'disponivel' (1 = sim, 0 = não)
+        # Tabela de Livros: Adicionei 'emprestado_por' pra saber com quem está o livro
         conn.execute('''
             CREATE TABLE IF NOT EXISTS livros (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 titulo TEXT NOT NULL,
                 categoria TEXT,
                 autor TEXT,
-                disponivel BOOLEAN DEFAULT 1
+                disponivel BOOLEAN DEFAULT 1,
+                emprestado_por TEXT
             );
         ''')
         
-        # Tabela de eventos culturais
+        # Tabela de Eventos
         conn.execute('''
             CREATE TABLE IF NOT EXISTS eventos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,20 +66,20 @@ def init_db():
             );
         ''')
         
-        # --- DADOS DE TESTE (SEED) ---
-        # Aqui eu crio um Admin automático se ele não existir, pra gente poder testar
+        # --- DADOS DE EXEMPLO (SEED) ---
+        # Verifico se já tem admin. Se não tiver, crio um padrão pra gente conseguir testar.
         cur = conn.cursor()
         cur.execute("SELECT count(*) FROM usuarios WHERE email = 'admin@email.com'")
         if cur.fetchone()[0] == 0:
             conn.execute("INSERT INTO usuarios (email, senha, nome, perfil) VALUES ('admin@email.com', 'admin123', 'Administrador Chefe', 'admin')")
-            print("--- ADMIN CRIADO AUTOMATICAMENTE ---")
+            print("--- ADMIN PADRÃO CRIADO ---")
 
-        # Crio também um leitor padrão
+        # Crio um leitor de teste também
         cur.execute("SELECT count(*) FROM usuarios WHERE email = 'leitor@email.com'")
         if cur.fetchone()[0] == 0:
             conn.execute("INSERT INTO usuarios (email, senha, nome, perfil) VALUES ('leitor@email.com', '123456', 'Leitor Comum', 'leitor')")
 
-        # Se não tiver livros, cadastro alguns de exemplo
+        # Se a biblioteca estiver vazia, adiciono uns livros e eventos iniciais
         cur.execute("SELECT count(*) FROM livros")
         if cur.fetchone()[0] == 0:
             conn.execute("INSERT INTO livros (titulo, categoria, autor) VALUES ('Dom Casmurro', 'Romance', 'Machado de Assis')")
@@ -83,82 +88,78 @@ def init_db():
         conn.commit()
         conn.close()
 
-# --- ROTAS DO SISTEMA ---
+# --- ROTAS E LÓGICA DO SISTEMA ---
 
-# Rota raiz: joga direto pro login
 @app.route('/')
 def index():
+    # Se entrar na raiz, manda direto pro login
     return redirect(url_for('login'))
 
-# Rota de Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Se for POST, é porque o usuário clicou em "Entrar"
     if request.method == 'POST':
         email = request.form['email']
         senha = request.form['senha']
         
         conn = get_db_connection()
-        # Verifica se existe esse usuário com essa senha no banco
+        # Busca o usuário no banco
         user = conn.execute('SELECT * FROM usuarios WHERE email = ? AND senha = ?', (email, senha)).fetchone()
         conn.close()
 
         if user:
-            # Salva os dados na sessão (cookie seguro)
+            # Login com sucesso: Guardo as infos na sessão
             session['usuario'] = user['email']
             session['nome_usuario'] = user['nome']
-            session['perfil'] = user['perfil'] # Importante pra saber se mostra botão de admin
+            session['perfil'] = user['perfil'] # Guardo o perfil pra usar nas proteções de rota
             return redirect(url_for('home'))
         else:
             flash('Email ou senha incorretos!', 'danger')
             
     return render_template('login.html')
 
-# Rota de Cadastro
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     if request.method == 'POST':
+        # Pegando dados do formulário
         nome = request.form['nome']
         email = request.form['email']
         senha = request.form['senha']
-        termos = request.form.get('termos') # Checkbox do LGPD
+        termos = request.form.get('termos')
 
-        # Validação exigida pelo feedback jurídico
+        # Validação importante: Se não marcar o checkbox da LGPD, não deixa cadastrar
         if not termos:
             flash('Você precisa aceitar os termos de uso.', 'warning')
             return render_template('cadastro.html')
 
         try:
             conn = get_db_connection()
-            # Por padrão, todo mundo que se cadastra é 'leitor'
+            # Todo cadastro novo entra como 'leitor' por segurança
             conn.execute("INSERT INTO usuarios (email, senha, nome, perfil) VALUES (?, ?, ?, 'leitor')", (email, senha, nome))
             conn.commit()
             conn.close()
             flash('Cadastro realizado! Faça login.', 'success')
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
-            # Se der erro de integridade, é porque o email já existe (UNIQUE no banco)
+            # O banco avisa se o email já existe (UNIQUE constraint)
             flash('Este email já está cadastrado.', 'danger')
 
     return render_template('cadastro.html')
 
-# Página Inicial (Menu)
 @app.route('/home')
 def home():
-    # Proteção: se não tiver logado, manda pro login
+    # Verificação de segurança: se não tiver logado, expulsa pro login
     if 'usuario' not in session: return redirect(url_for('login'))
     return render_template('home.html')
 
-# Listagem de Livros + Busca
 @app.route('/livros')
 def livros():
     if 'usuario' not in session: return redirect(url_for('login'))
     
-    pesquisa = request.args.get('q') # Pega o que foi digitado na busca
+    pesquisa = request.args.get('q')
     conn = get_db_connection()
     
     if pesquisa:
-        # Busca aprimorada: procura no Título, Autor ou Categoria (SQL com LIKE)
+        # Implementei uma busca universal: procura no título, autor OU categoria
         termo = '%' + pesquisa + '%'
         livros = conn.execute("""
             SELECT * FROM livros 
@@ -168,29 +169,27 @@ def livros():
         if not livros:
             flash(f'Nenhum livro encontrado para "{pesquisa}".', 'warning')
     else:
-        # Se não buscou nada, traz tudo
+        # Se não tiver busca, lista tudo
         livros = conn.execute('SELECT * FROM livros').fetchall()
     
     conn.close()
     return render_template('livros.html', livros=livros)
 
-# Adicionar Livro (Restrito para Admin)
+# Rota exclusiva para Admin cadastrar livros
 @app.route('/livros/adicionar', methods=['GET', 'POST'])
 def adicionar_livro():
     if 'usuario' not in session: return redirect(url_for('login'))
     
-    # Verificação de segurança: só admin passa daqui
+    # Bloqueio de segurança: Se não for admin, não entra
     if session.get('perfil') != 'admin': 
         flash('Acesso negado. Apenas administradores podem cadastrar livros.', 'danger')
         return redirect(url_for('livros'))
 
     if request.method == 'POST':
-        titulo = request.form['titulo']
-        autor = request.form['autor']
-        categoria = request.form['categoria']
-        
+        # Salva o livro no banco
         conn = get_db_connection()
-        conn.execute("INSERT INTO livros (titulo, autor, categoria) VALUES (?, ?, ?)", (titulo, autor, categoria))
+        conn.execute("INSERT INTO livros (titulo, autor, categoria) VALUES (?, ?, ?)", 
+                     (request.form['titulo'], request.form['autor'], request.form['categoria']))
         conn.commit()
         conn.close()
         flash('Livro cadastrado com sucesso!', 'success')
@@ -198,7 +197,6 @@ def adicionar_livro():
 
     return render_template('novo_livro.html')
 
-# Listagem de Eventos
 @app.route('/eventos')
 def eventos():
     if 'usuario' not in session: return redirect(url_for('login'))
@@ -207,7 +205,7 @@ def eventos():
     conn.close()
     return render_template('eventos.html', eventos=eventos)
 
-# Adicionar Evento (Restrito para Admin)
+# Rota exclusiva para Admin criar eventos
 @app.route('/eventos/adicionar', methods=['GET', 'POST'])
 def adicionar_evento():
     if 'usuario' not in session: return redirect(url_for('login'))
@@ -216,14 +214,9 @@ def adicionar_evento():
         return redirect(url_for('eventos'))
 
     if request.method == 'POST':
-        titulo = request.form['titulo']
-        descricao = request.form['descricao']
-        data = request.form['data']
-        local = request.form['local']
-        
         conn = get_db_connection()
         conn.execute("INSERT INTO eventos (titulo, descricao, data, local) VALUES (?, ?, ?, ?)", 
-                     (titulo, descricao, data, local))
+                     (request.form['titulo'], request.form['descricao'], request.form['data'], request.form['local']))
         conn.commit()
         conn.close()
         flash('Evento criado com sucesso!', 'success')
@@ -231,14 +224,9 @@ def adicionar_evento():
 
     return render_template('novo_evento.html')
 
-# Rota de Empréstimo e Devolução
+# Lógica de Empréstimo e Devolução
 @app.route('/livros/emprestar/<int:livro_id>')
 def alternar_emprestimo(livro_id):
-    """
-    Lógica do Empréstimo:
-    - Se tá disponível -> Qualquer um pega emprestado.
-    - Se tá emprestado -> Só o Admin pode devolver (segurança).
-    """
     if 'usuario' not in session: return redirect(url_for('login'))
     
     conn = get_db_connection()
@@ -246,45 +234,47 @@ def alternar_emprestimo(livro_id):
     
     if livro:
         if livro['disponivel']: 
-            # Pegando emprestado
-            novo_status = 0
+            # CENÁRIO 1: PEGAR EMPRESTADO
+            # Qualquer usuário pode pegar. Eu gravo o nome dele pra saber com quem está.
+            conn.execute('UPDATE livros SET disponivel = 0, emprestado_por = ? WHERE id = ?', 
+                         (session['nome_usuario'], livro_id))
             acao = "emprestado"
         else:
-            # Devolvendo (Regra de negócio: Só admin confirma devolução)
+            # CENÁRIO 2: DEVOLVER
+            # Só o Admin pode dar baixa na devolução pra garantir que o livro voltou mesmo
             if session.get('perfil') != 'admin':
-                flash('Apenas administradores podem confirmar a devolução do livro.', 'danger')
+                flash('Apenas administradores podem confirmar a devolução.', 'danger')
                 conn.close()
                 return redirect(url_for('livros'))
             
-            novo_status = 1
+            # Limpo o campo 'emprestado_por' e deixo disponível de novo
+            conn.execute('UPDATE livros SET disponivel = 1, emprestado_por = NULL WHERE id = ?', (livro_id,))
             acao = "devolvido"
 
-        conn.execute('UPDATE livros SET disponivel = ? WHERE id = ?', (novo_status, livro_id))
         conn.commit()
         flash(f'Livro {acao} com sucesso!', 'success')
     
     conn.close()
     return redirect(url_for('livros'))
 
-# Logout
 @app.route('/logout')
 def logout():
-    session.clear() # Limpa a sessão pra ninguém entrar de novo sem senha
+    session.clear() # Limpa a sessão e desloga
     return redirect(url_for('login'))
 
-# Página 404 personalizada (pra ficar mais bonito se errar o link)
+# Página de erro personalizada pra melhorar a UX
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
 # --- INICIALIZAÇÃO ---
-# Garante que o banco existe antes de tudo (importante pro Railway)
+# Garante que a pasta e o banco existam antes de rodar (essencial pro Railway)
 if not os.path.exists(os.path.dirname(DB_PATH)):
     os.makedirs(os.path.dirname(DB_PATH))
 
 init_db() 
 
 if __name__ == '__main__':
-    # Pega a porta do ambiente ou usa 5000 se eu tiver rodando no meu PC
+    # Pega a porta do ambiente (Railway) ou usa 5000 se for local
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)

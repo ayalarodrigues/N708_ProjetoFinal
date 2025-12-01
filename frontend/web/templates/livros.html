@@ -17,28 +17,41 @@
     <div class="row">
         {% for livro in livros %}
         <div class="col-md-4">
-            <div class="card p-3">
-                <h5 class="card-title">{{ livro['titulo'] }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ livro['autor'] }}</h6>
-                <p class="card-text"><small>{{ livro['categoria'] }}</small></p>
-                
-                <div class="mt-2 d-flex justify-content-between align-items-center">
-                    {% if livro['disponivel'] %}
-                        <span class="badge bg-success">Disponível</span>
-                        
-                        <a href="{{ url_for('alternar_emprestimo', livro_id=livro['id']) }}" class="btn btn-sm btn-outline-warning">Emprestar</a>
+            <div class="card p-3 mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ livro['titulo'] }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ livro['autor'] }}</h6>
+                    <p class="card-text"><small>{{ livro['categoria'] }}</small></p>
                     
-                    {% else %}
-                        <span class="badge bg-danger">Emprestado</span>
+                    <hr>
+
+                    <div class="mt-2 d-flex justify-content-between align-items-center">
+                        {% if livro['disponivel'] %}
+                            <div>
+                                <span class="badge bg-success">Disponível</span>
+                            </div>
+                            
+                            <a href="{{ url_for('alternar_emprestimo', livro_id=livro['id']) }}" class="btn btn-sm btn-outline-warning">Emprestar</a>
                         
-                        {% if session.get('perfil') == 'admin' %}
-                            <a href="{{ url_for('alternar_emprestimo', livro_id=livro['id']) }}" 
-                               class="btn btn-sm btn-outline-info"
-                               onclick="return confirm('Tem certeza que deseja confirmar a devolução deste livro?')">
-                               Devolver
-                            </a>
+                        {% else %}
+                            <div>
+                                <span class="badge bg-danger">Emprestado</span>
+                                {% if session.get('perfil') == 'admin' and livro['emprestado_por'] %}
+                                    <small class="d-block text-muted mt-1" style="font-size: 0.75rem;">
+                                        Com: <strong>{{ livro['emprestado_por'] }}</strong>
+                                    </small>
+                                {% endif %}
+                            </div>
+                            
+                            {% if session.get('perfil') == 'admin' %}
+                                <a href="{{ url_for('alternar_emprestimo', livro_id=livro['id']) }}" 
+                                   class="btn btn-sm btn-outline-info"
+                                   onclick="return confirm('Confirmar a devolução deste livro?')">
+                                   Devolver
+                                </a>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -46,6 +59,7 @@
             <div class="col-12 text-center text-muted mt-5">
                 <h4>📭 Nenhum livro encontrado.</h4>
                 <p>Tente buscar por outro termo ou limpe a pesquisa.</p>
+                <a href="{{ url_for('livros') }}" class="btn btn-sm btn-primary">Ver todos os livros</a>
             </div>
         {% endfor %}
     </div>
