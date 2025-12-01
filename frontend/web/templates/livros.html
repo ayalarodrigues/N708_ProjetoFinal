@@ -9,7 +9,7 @@
     </div>
 
     <form class="d-flex mb-4" method="GET" action="{{ url_for('livros') }}">
-        <input class="form-control me-2" type="search" name="q" placeholder="Pesquisar por título..." aria-label="Search">
+        <input class="form-control me-2" type="search" name="q" placeholder="Pesquisar título, autor ou categoria..." aria-label="Search">
         <button class="btn btn-outline-primary" type="submit">Pesquisar</button>
         <a href="{{ url_for('livros') }}" class="btn btn-outline-secondary ms-2">Limpar</a>
     </form>
@@ -32,7 +32,11 @@
                         <span class="badge bg-danger">Emprestado</span>
                         
                         {% if session.get('perfil') == 'admin' %}
-                            <a href="{{ url_for('alternar_emprestimo', livro_id=livro['id']) }}" class="btn btn-sm btn-outline-info">Devolver</a>
+                            <a href="{{ url_for('alternar_emprestimo', livro_id=livro['id']) }}" 
+                               class="btn btn-sm btn-outline-info"
+                               onclick="return confirm('Tem certeza que deseja confirmar a devolução deste livro?')">
+                               Devolver
+                            </a>
                         {% endif %}
                     {% endif %}
                 </div>

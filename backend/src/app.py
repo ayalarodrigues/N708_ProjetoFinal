@@ -138,9 +138,15 @@ def livros():
     conn = get_db_connection()
     
     if pesquisa:
-        livros = conn.execute("SELECT * FROM livros WHERE titulo LIKE ?", ('%' + pesquisa + '%',)).fetchall()
+        # MELHORIA: Busca no Título, Autor OU Categoria
+        termo = '%' + pesquisa + '%'
+        livros = conn.execute("""
+            SELECT * FROM livros 
+            WHERE titulo LIKE ? OR autor LIKE ? OR categoria LIKE ?
+        """, (termo, termo, termo)).fetchall()
+        
         if not livros:
-            flash(f'Nenhum livro encontrado para "{pesquisa}".', 'warning')
+            flash(f'Nenhum livro, autor ou categoria encontrado para "{pesquisa}".', 'warning')
     else:
         livros = conn.execute('SELECT * FROM livros').fetchall()
     
