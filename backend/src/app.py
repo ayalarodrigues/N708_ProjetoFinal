@@ -2,26 +2,32 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3
 import os
 
-# Configuração de caminhos
+# --- CONFIGURAÇÕES INICIAIS ---
+# Aqui eu pego o caminho exato da pasta onde esse arquivo tá, pra não ter erro de "File not found"
 base_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Defino onde estão as pastas de HTML (templates) e CSS (static) voltando pastas (../../)
 template_dir = os.path.join(base_dir, '../../frontend/web/templates')
 static_dir = os.path.join(base_dir, '../../frontend/web/static')
 
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
-app.secret_key = 'chave_super_secreta_projeto_unifor'
+app.secret_key = 'chave_super_secreta_projeto_unifor' # Chave pra criptografar a sessão do usuário
 
+# Caminho do banco de dados SQLite
 DB_PATH = os.path.join(base_dir, '../../database/biblioteca.db')
 
+# Função auxiliar pra conectar no banco sem repetir código toda hora
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+    conn.row_factory = sqlite3.Row # Isso ajuda a pegar as colunas pelo nome (ex: user['email'])
     return conn
 
+# --- CRIAÇÃO DO BANCO ---
 def init_db():
     with app.app_context():
         conn = get_db_connection()
         
-        # Tabela Usuários (com campo perfil)
+        # Criando a tabela de usuários. O perfil define se é admin ou leitor.
         conn.execute('''
             CREATE TABLE IF NOT EXISTS usuarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,7 +39,7 @@ def init_db():
             );
         ''')
         
-        # Tabelas de Livros e Eventos
+        # Tabela de livros com o campo 'disponivel' (1 = sim, 0 = não)
         conn.execute('''
             CREATE TABLE IF NOT EXISTS livros (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,6 +49,8 @@ def init_db():
                 disponivel BOOLEAN DEFAULT 1
             );
         ''')
+        
+        # Tabela de eventos culturais
         conn.execute('''
             CREATE TABLE IF NOT EXISTS eventos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,20 +61,20 @@ def init_db():
             );
         ''')
         
-        # --- DADOS INICIAIS (SEED) ---
-        # Cria um ADMIN se não existir
+        # --- DADOS DE TESTE (SEED) ---
+        # Aqui eu crio um Admin automático se ele não existir, pra gente poder testar
         cur = conn.cursor()
         cur.execute("SELECT count(*) FROM usuarios WHERE email = 'admin@email.com'")
         if cur.fetchone()[0] == 0:
             conn.execute("INSERT INTO usuarios (email, senha, nome, perfil) VALUES ('admin@email.com', 'admin123', 'Administrador Chefe', 'admin')")
-            print("--- USUÁRIO ADMIN CRIADO: admin@email.com / senha: admin123 ---")
+            print("--- ADMIN CRIADO AUTOMATICAMENTE ---")
 
-        # Cria um LEITOR padrão
+        # Crio também um leitor padrão
         cur.execute("SELECT count(*) FROM usuarios WHERE email = 'leitor@email.com'")
         if cur.fetchone()[0] == 0:
             conn.execute("INSERT INTO usuarios (email, senha, nome, perfil) VALUES ('leitor@email.com', '123456', 'Leitor Comum', 'leitor')")
 
-        # Dados de exemplo para livros e eventos
+        # Se não tiver livros, cadastro alguns de exemplo
         cur.execute("SELECT count(*) FROM livros")
         if cur.fetchone()[0] == 0:
             conn.execute("INSERT INTO livros (titulo, categoria, autor) VALUES ('Dom Casmurro', 'Romance', 'Machado de Assis')")
@@ -75,70 +83,82 @@ def init_db():
         conn.commit()
         conn.close()
 
-# --- ROTAS ---
+# --- ROTAS DO SISTEMA ---
 
+# Rota raiz: joga direto pro login
 @app.route('/')
 def index():
     return redirect(url_for('login'))
 
+# Rota de Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # Se for POST, é porque o usuário clicou em "Entrar"
     if request.method == 'POST':
         email = request.form['email']
         senha = request.form['senha']
         
         conn = get_db_connection()
+        # Verifica se existe esse usuário com essa senha no banco
         user = conn.execute('SELECT * FROM usuarios WHERE email = ? AND senha = ?', (email, senha)).fetchone()
         conn.close()
 
         if user:
+            # Salva os dados na sessão (cookie seguro)
             session['usuario'] = user['email']
             session['nome_usuario'] = user['nome']
-            session['perfil'] = user['perfil'] # Guarda se é admin ou leitor
+            session['perfil'] = user['perfil'] # Importante pra saber se mostra botão de admin
             return redirect(url_for('home'))
         else:
             flash('Email ou senha incorretos!', 'danger')
             
     return render_template('login.html')
 
+# Rota de Cadastro
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     if request.method == 'POST':
         nome = request.form['nome']
         email = request.form['email']
         senha = request.form['senha']
-        termos = request.form.get('termos')
+        termos = request.form.get('termos') # Checkbox do LGPD
 
+        # Validação exigida pelo feedback jurídico
         if not termos:
             flash('Você precisa aceitar os termos de uso.', 'warning')
             return render_template('cadastro.html')
 
         try:
             conn = get_db_connection()
+            # Por padrão, todo mundo que se cadastra é 'leitor'
             conn.execute("INSERT INTO usuarios (email, senha, nome, perfil) VALUES (?, ?, ?, 'leitor')", (email, senha, nome))
             conn.commit()
             conn.close()
             flash('Cadastro realizado! Faça login.', 'success')
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
+            # Se der erro de integridade, é porque o email já existe (UNIQUE no banco)
             flash('Este email já está cadastrado.', 'danger')
 
     return render_template('cadastro.html')
 
+# Página Inicial (Menu)
 @app.route('/home')
 def home():
+    # Proteção: se não tiver logado, manda pro login
     if 'usuario' not in session: return redirect(url_for('login'))
     return render_template('home.html')
 
+# Listagem de Livros + Busca
 @app.route('/livros')
 def livros():
     if 'usuario' not in session: return redirect(url_for('login'))
     
-    pesquisa = request.args.get('q')
+    pesquisa = request.args.get('q') # Pega o que foi digitado na busca
     conn = get_db_connection()
     
     if pesquisa:
-        # MELHORIA: Busca no Título, Autor OU Categoria
+        # Busca aprimorada: procura no Título, Autor ou Categoria (SQL com LIKE)
         termo = '%' + pesquisa + '%'
         livros = conn.execute("""
             SELECT * FROM livros 
@@ -146,18 +166,21 @@ def livros():
         """, (termo, termo, termo)).fetchall()
         
         if not livros:
-            flash(f'Nenhum livro, autor ou categoria encontrado para "{pesquisa}".', 'warning')
+            flash(f'Nenhum livro encontrado para "{pesquisa}".', 'warning')
     else:
+        # Se não buscou nada, traz tudo
         livros = conn.execute('SELECT * FROM livros').fetchall()
     
     conn.close()
     return render_template('livros.html', livros=livros)
 
-# ROTA NOVA: Adicionar Livro (Só Admin)
+# Adicionar Livro (Restrito para Admin)
 @app.route('/livros/adicionar', methods=['GET', 'POST'])
 def adicionar_livro():
     if 'usuario' not in session: return redirect(url_for('login'))
-    if session.get('perfil') != 'admin': # Segurança no Backend
+    
+    # Verificação de segurança: só admin passa daqui
+    if session.get('perfil') != 'admin': 
         flash('Acesso negado. Apenas administradores podem cadastrar livros.', 'danger')
         return redirect(url_for('livros'))
 
@@ -175,6 +198,7 @@ def adicionar_livro():
 
     return render_template('novo_livro.html')
 
+# Listagem de Eventos
 @app.route('/eventos')
 def eventos():
     if 'usuario' not in session: return redirect(url_for('login'))
@@ -183,7 +207,7 @@ def eventos():
     conn.close()
     return render_template('eventos.html', eventos=eventos)
 
-# ROTA NOVA: Adicionar Evento (Só Admin)
+# Adicionar Evento (Restrito para Admin)
 @app.route('/eventos/adicionar', methods=['GET', 'POST'])
 def adicionar_evento():
     if 'usuario' not in session: return redirect(url_for('login'))
@@ -207,15 +231,13 @@ def adicionar_evento():
 
     return render_template('novo_evento.html')
 
-
-
-# ROTA ATUALIZADA: Alternar status (para devolução)
+# Rota de Empréstimo e Devolução
 @app.route('/livros/emprestar/<int:livro_id>')
 def alternar_emprestimo(livro_id):
     """
-    Rota responsável por alternar o status de um livro.
-    - Se disponível -> Marca como emprestado.
-    - Se emprestado -> Marca como devolvido (Apenas Admin).
+    Lógica do Empréstimo:
+    - Se tá disponível -> Qualquer um pega emprestado.
+    - Se tá emprestado -> Só o Admin pode devolver (segurança).
     """
     if 'usuario' not in session: return redirect(url_for('login'))
     
@@ -223,13 +245,12 @@ def alternar_emprestimo(livro_id):
     livro = conn.execute('SELECT * FROM livros WHERE id = ?', (livro_id,)).fetchone()
     
     if livro:
-        # Lógica de Segurança
         if livro['disponivel']: 
-            # SE ESTÁ DISPONÍVEL: Qualquer um pode pegar emprestado
+            # Pegando emprestado
             novo_status = 0
             acao = "emprestado"
         else:
-            # SE ESTÁ EMPRESTADO: Só Admin pode devolver (receber o livro de volta)
+            # Devolvendo (Regra de negócio: Só admin confirma devolução)
             if session.get('perfil') != 'admin':
                 flash('Apenas administradores podem confirmar a devolução do livro.', 'danger')
                 conn.close()
@@ -245,22 +266,25 @@ def alternar_emprestimo(livro_id):
     conn.close()
     return redirect(url_for('livros'))
 
+# Logout
 @app.route('/logout')
 def logout():
-    session.clear()
+    session.clear() # Limpa a sessão pra ninguém entrar de novo sem senha
     return redirect(url_for('login'))
 
-# Isso garante que o banco seja criado mesmo rodando pelo Gunicorn no Railway
-if not os.path.exists(os.path.dirname(DB_PATH)):
-    os.makedirs(os.path.dirname(DB_PATH))
-
-init_db() 
-# -------------------------------------------------------------
+# Página 404 personalizada (pra ficar mais bonito se errar o link)
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
+# --- INICIALIZAÇÃO ---
+# Garante que o banco existe antes de tudo (importante pro Railway)
+if not os.path.exists(os.path.dirname(DB_PATH)):
+    os.makedirs(os.path.dirname(DB_PATH))
+
+init_db() 
+
 if __name__ == '__main__':
-    # Só roda se você executar 'python app.py' no seu computador
+    # Pega a porta do ambiente ou usa 5000 se eu tiver rodando no meu PC
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
