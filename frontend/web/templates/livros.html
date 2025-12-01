@@ -22,11 +22,18 @@
                 <h6 class="card-subtitle mb-2 text-muted">{{ livro['autor'] }}</h6>
                 <p class="card-text"><small>{{ livro['categoria'] }}</small></p>
                 
-                <div class="mt-2">
+                <div class="mt-2 d-flex justify-content-between align-items-center">
                     {% if livro['disponivel'] %}
                         <span class="badge bg-success">Disponível</span>
+                        
+                        <a href="{{ url_for('alternar_emprestimo', livro_id=livro['id']) }}" class="btn btn-sm btn-outline-warning">Emprestar</a>
+                    
                     {% else %}
                         <span class="badge bg-danger">Emprestado</span>
+                        
+                        {% if session.get('perfil') == 'admin' %}
+                            <a href="{{ url_for('alternar_emprestimo', livro_id=livro['id']) }}" class="btn btn-sm btn-outline-info">Devolver</a>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

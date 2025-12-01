@@ -201,6 +201,39 @@ def adicionar_evento():
 
     return render_template('novo_evento.html')
 
+
+
+# ROTA ATUALIZADA: Alternar status (para devolução)
+@app.route('/livros/emprestar/<int:livro_id>')
+def alternar_emprestimo(livro_id):
+    if 'usuario' not in session: return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    livro = conn.execute('SELECT * FROM livros WHERE id = ?', (livro_id,)).fetchone()
+    
+    if livro:
+        # Lógica de Segurança
+        if livro['disponivel']: 
+            # SE ESTÁ DISPONÍVEL: Qualquer um pode pegar emprestado
+            novo_status = 0
+            acao = "emprestado"
+        else:
+            # SE ESTÁ EMPRESTADO: Só Admin pode devolver (receber o livro de volta)
+            if session.get('perfil') != 'admin':
+                flash('Apenas administradores podem confirmar a devolução do livro.', 'danger')
+                conn.close()
+                return redirect(url_for('livros'))
+            
+            novo_status = 1
+            acao = "devolvido"
+
+        conn.execute('UPDATE livros SET disponivel = ? WHERE id = ?', (novo_status, livro_id))
+        conn.commit()
+        flash(f'Livro {acao} com sucesso!', 'success')
+    
+    conn.close()
+    return redirect(url_for('livros'))
+
 @app.route('/logout')
 def logout():
     session.clear()
