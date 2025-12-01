@@ -15,7 +15,8 @@ Abaixo, a lista de funcionalidades entregues nesta etapa, com status de implemen
 
 - [x] **Controle de Acesso:** Login seguro com distinção de perfis (Administrador e Leitor).
 - [x] **Gestão de Usuários:** Cadastro de leitores com validação obrigatória de Termos de Uso (LGPD).
-- [x] **Gestão de Acervo:** Cadastro, listagem e busca textual de livros em tempo real.
+- [x] **Gestão de Acervo:** Cadastro, listagem e **busca universal (Título/Autor/Categoria).
+- [x] **Controle de Empréstimos:** Sistema inteligente onde usuários solicitam empréstimo e apenas Administradores confirmam a devolução.
 - [x] **Status de Disponibilidade:** Indicador visual imediato (Verde/Vermelho) na listagem de livros, substituindo o cálculo complexo de multas para focar na experiência do usuário.
 - [x] **Agenda Cultural:** Divulgação de eventos com informações detalhadas de acessibilidade e local.
 - [x] **Interface Responsiva:** Layout adaptável para dispositivos móveis (Smartphones/Tablets) e Desktops.
