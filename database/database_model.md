@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS livros (
     titulo TEXT NOT NULL,
     categoria TEXT,
     autor TEXT,
-    disponivel BOOLEAN DEFAULT 1 -- 1 = Disponível na estante, 0 = Emprestado
+    disponivel BOOLEAN DEFAULT 1, -- 1 = Disponível na estante, 0 = Emprestado
+    emprestado_por TEXT -- Armazena o nome do usuário responsável pelo empréstimo
 );
 
 -- ==================================================
